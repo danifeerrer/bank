@@ -7,7 +7,8 @@ public class main {
         atm.addMoney(2);
         atm.transaction(receptor, 30);
         System.out.println(receptor.getBalance());
-        System.out.print(account.getBalance());
+
+        System.out.println("hola");
 
     }
 }
