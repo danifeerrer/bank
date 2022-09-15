@@ -1,15 +1,18 @@
-public class BankAccount {
-    private int accountNumber;
+import java.io.Serializable;
+public class BankAccount implements Serializable{
+    private double accountNumber;
     private String ownerName;
     private double balance;
 
-    public BankAccount(String ownerName, int accountNumber, double balance){
+    public BankAccount(String ownerName, double accountNumber, double balance){
         this.ownerName = ownerName;
         this.accountNumber = accountNumber;
         this.balance = balance;
     }
+    public BankAccount(){
 
-    public int getAccountNumber() {
+    }
+    public double getAccountNumber() {
         return accountNumber;
     }
 
@@ -21,7 +24,7 @@ public class BankAccount {
         return ownerName;
     }
 
-    public void setAccountNumber(int accountNumber) {
+    public void setAccountNumber(double accountNumber) {
         this.accountNumber = accountNumber;
     }
 
@@ -31,5 +34,14 @@ public class BankAccount {
 
     public void setOwnerName(String ownerName) {
         this.ownerName = ownerName;
+    }
+
+    @Override
+    public String toString() {
+        return "BankAccount{" +
+                "accountNumber=" + accountNumber +
+                ", ownerName='" + ownerName + '\'' +
+                ", balance=" + balance +
+                '}';
     }
 }
