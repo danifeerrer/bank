@@ -1,5 +1,5 @@
-import java.io.Serializable;
-public class BankAccount implements Serializable{
+
+public class BankAccount{
     private double accountNumber;
     private String ownerName;
     private double balance;
@@ -45,3 +45,17 @@ public class BankAccount implements Serializable{
                 '}';
     }
 }
+/*
+        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("accounts.txt"));
+        out.writeObject(account);
+        ObjectInputStream in = new ObjectInputStream(new FileInputStream("accounts.txt"));
+        BankAccount account2 = (BankAccount) in.readObject();
+
+        System.out.println(account2.getAccountNumber());
+
+        atm.addMoney(valor2);
+        atm.transaction(receptor, 30);
+        System.out.println(receptor.getBalance());
+        System.out.println(account.getBalance());
+
+        */
