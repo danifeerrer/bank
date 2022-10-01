@@ -34,13 +34,17 @@ public class Engine {
         BankAccount account_menu = null;
         ATM atm_menu = null;
         Scanner input = new Scanner(System.in);
+        String ownerName;
+        double account_number, balance1;
         while(run){
 
             System.out.println("\n1. Crear una cuenta corriente-> ");
-            System.out.println("2. Ingresar dinero en la cuenta->");
-            System.out.println("3. Retirar dinero de la cuenta-> ");
-            System.out.println("4. Imprimir informacion sobre la cuenta-> ");
-            System.out.println("5. Salir-> \n");
+            System.out.println("2. Login");
+            System.out.println("3. Ingresar dinero en la cuenta->");
+            System.out.println("4. Retirar dinero de la cuenta-> ");
+            System.out.println("5. Imprimir informacion sobre la cuenta-> ");
+            System.out.println("6. Logout");
+            System.out.println("7. Salir-> \n");
 
 
             String numero = input.nextLine();
@@ -64,9 +68,6 @@ public class Engine {
                     int balance = (Integer.parseInt(input.nextLine()));
                     System.out.println("Ingrese su contraseña: ");
                     String password2 = input.nextLine();
-                    account_menu = new BankAccount(nombre,cuenta,balance);
-                    atm_menu = new ATM(account_menu);
-                    System.out.println(account_menu.getOwnerName());
                     try{
                         Connection connection = DriverManager.getConnection(this.url, this.username,this.password);
                         Statement statement = connection.createStatement();
@@ -82,12 +83,33 @@ public class Engine {
                         e.printStackTrace();
                     }
                     break;
-
                 case 2:
+                    System.out.println("Enter the name of your account: ");
+                    String name_account = input.nextLine();
+                    System.out.println("Enter your password: ");
+                    String password1 = input.nextLine();
+                    try{
+                        Connection connection = DriverManager.getConnection(this.url, this.username,this.password);
+                        Statement statement = connection.createStatement();
+                        ResultSet resultSet = statement.executeQuery("select* from tabla where ownerName='"+ name_account+ "' " +
+                                "AND password='" + password1 + "'");
+                        while(resultSet.next()){
+                            ownerName = resultSet.getString("ownerName");
+                            account_number = resultSet.getDouble("accountNumber");
+                            balance1 = resultSet.getDouble("balance");
+                            account_menu = new BankAccount(ownerName,account_number,balance1);
+                        }
+                    } catch(Exception e){
+                        e.printStackTrace();
+                    }
+                    atm_menu = new ATM(account_menu);
+                    break;
+
+                case 3:
                     System.out.print("Indique la cantidad que quiera ingresar: ");
                     String cantidad = input.nextLine();
                     if(account_menu == null){
-                        System.out.println("First you need to create an account: ");
+                        System.out.println("First you need to login: ");
                         break;
                     }
                     while(isDouble(cantidad) != true){
@@ -98,13 +120,20 @@ public class Engine {
                     //En que casos se puede utilizar null??
                     atm_menu.addMoney(cantidad_para_añadir);
                     System.out.println(account_menu.getBalance());
+                    try{
+                        Connection connection = DriverManager.getConnection(this.url, this.username, this.password);
+                        Statement statement = connection.createStatement();
+                        statement.executeUpdate("update tabla set balance=" + account_menu.getBalance() + "where ownerName='" + account_menu.getOwnerName() + "';");
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
                     break;
-                case 3:
+                case 4:
                     System.out.print("Indique la cantidad que quiera retirar: ");
                     String cantidad2 = input.nextLine();
 
                     if(account_menu == null){
-                        System.out.println("First you need to create an account");
+                        System.out.println("First you need to login");
                         break;
                     }
                     while(!isDouble(cantidad2)){
@@ -114,35 +143,25 @@ public class Engine {
                     double cantidad_para_retirar = Double.parseDouble(cantidad2);
                     atm_menu.withDraw(cantidad_para_retirar);
                     System.out.println(account_menu.getBalance());
-                    break;
-                case 4:
-                    /*
-                    if(account_menu == null){
-                        System.out.println("First you need to create an account");
-                        break;
-                    }
-                    System.out.println(account_menu.toString());
-                     */
-                    System.out.println("Enter the name of your account: ");
-                    String name_account = input.nextLine();
-                    System.out.println("Enter your password: ");
-                    String password1 = input.nextLine();
                     try{
-                        Connection connection = DriverManager.getConnection(this.url, this.username,this.password);
+                        Connection connection = DriverManager.getConnection(this.url, this.username, this.password);
                         Statement statement = connection.createStatement();
-                        ResultSet resultSet = statement.executeQuery("select* from tabla where ownerName='"+ name_account+ "' " +
-                                "AND password='" + password1 + "'");
-                        while(resultSet.next()) {
-                            System.out.println((resultSet.getString("ownerName") + " " +
-                                    resultSet.getString("accountNumber")) + " " +
-                                    resultSet.getDouble("balance"));
-                        }
+                        statement.executeUpdate("update tabla set balance=" + account_menu.getBalance() + "where ownerName='" + account_menu.getOwnerName() + "';");
                     }catch(Exception e){
                         e.printStackTrace();
                     }
                     break;
-
                 case 5:
+                    if(account_menu == null){
+                        System.out.println("First you need to Login, if you don't\nhave an account, create one, pressing 1");
+                        break;
+                    }
+                    System.out.println(account_menu.toString());
+                    break;
+                case 6:
+                    account_menu = null;
+                    break;
+                case 7:
                     System.out.println("Saliste de la aplicacion");
                     run = false;
             }
