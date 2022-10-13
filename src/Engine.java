@@ -1,5 +1,11 @@
+import objects.Account;
+import objects.BankAccount;
+import objects.Costumer;
+
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Scanner;
+import javax.swing.*;
 
 /*
         String url = "jdbc:mysql://localhost:3306/bank";
@@ -25,15 +31,23 @@ import java.util.Scanner;
         }
  */
 public class Engine {
-
+    private static JLabel userLabel;
+    private static JTextField userText;
+    private static JLabel passwordLabel;
+    private static JPasswordField passwordText;
+    private static JButton button;
+    private static JLabel success;
+    Scanner input = new Scanner(System.in);
+    private Costumer costumer;
     private String url = "jdbc:mysql://localhost:3306/bank";
     private String username = "root";
     private String password = "$contraseña$11";
+
+
     public void work() {
         boolean run = true;
         BankAccount account_menu = null;
         ATM atm_menu = null;
-        Scanner input = new Scanner(System.in);
         String ownerName;
         double account_number, balance1;
         while(run){
@@ -84,25 +98,8 @@ public class Engine {
                     }
                     break;
                 case 2:
-                    System.out.println("Enter the name of your account: ");
-                    String name_account = input.nextLine();
-                    System.out.println("Enter your password: ");
-                    String password1 = input.nextLine();
-                    try{
-                        Connection connection = DriverManager.getConnection(this.url, this.username,this.password);
-                        Statement statement = connection.createStatement();
-                        ResultSet resultSet = statement.executeQuery("select* from tabla where ownerName='"+ name_account+ "' " +
-                                "AND password='" + password1 + "'");
-                        while(resultSet.next()){
-                            ownerName = resultSet.getString("ownerName");
-                            account_number = resultSet.getDouble("accountNumber");
-                            balance1 = resultSet.getDouble("balance");
-                            account_menu = new BankAccount(ownerName,account_number,balance1);
-                        }
-                    } catch(Exception e){
-                        e.printStackTrace();
-                    }
-                    atm_menu = new ATM(account_menu);
+
+                    login();
                     break;
 
                 case 3:
@@ -152,11 +149,14 @@ public class Engine {
                     }
                     break;
                 case 5:
+                    /*
                     if(account_menu == null){
                         System.out.println("First you need to Login, if you don't\nhave an account, create one, pressing 1");
                         break;
                     }
                     System.out.println(account_menu.toString());
+                     */
+                    info();
                     break;
                 case 6:
                     account_menu = null;
@@ -167,6 +167,16 @@ public class Engine {
             }
         }
     }
+
+    private void info() {
+        if(costumer == null){
+            System.out.println("No existe");
+            return;
+        }
+        System.out.println(this.costumer.getAccounts().toString());
+
+    }
+
     private static boolean isDouble(String parametro){
         boolean resultado;
         try {
@@ -190,4 +200,64 @@ public class Engine {
         return resultado;
     }
 
+    /*@Override
+    public void actionPerformed(ActionEvent e) {
+        userLogin = userText.getText();
+        passwordLogin = passwordText.getText();
+    }
+     */
+    public boolean login(){
+        System.out.print("Enter the name of your account: ");
+        String name_account = input.nextLine();
+        System.out.print("Enter your password: ");
+        String password1 = input.nextLine();
+        try{
+
+            Connection connection = DriverManager.getConnection(this.url, this.username,this.password);
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("select* from customer where customer_name='"+ name_account + "' " +
+                    "AND password='" + password1 + "'");
+            while(resultSet.next()){
+                this.costumer = new Costumer(
+                        resultSet.getString("customer_name"),
+                        resultSet.getString("customer_street"),
+                        resultSet.getString("customer_city"));
+                System.out.println("Has entrado");
+            }
+
+            resultSet = statement.executeQuery("select branch_name, balance, account_number from account where account_number in (select account_number from depositor where customer_name ='" + this.costumer.getName() + "');");
+            while(resultSet.next()){
+
+                this.costumer.addAccount(new Account(resultSet.getString("account_number"),
+                        resultSet.getDouble("balance"),
+                        resultSet.getString("branch_name")));
+
+            }
+            if (this.costumer.getAccounts().size() > 1){
+                System.out.println("Choose one of your accounts: ");
+                this.costumer.getAccounts().forEach((account -> System.out.println(" - " + account.getAccount_number())
+                        ));
+                String account_choosen = input.nextLine();
+                for(int i = 0; i < this.costumer.getAccounts().size(); i++){
+                    if (this.costumer.getAccounts().get(i).getAccount_number() == account_choosen){
+                        this.costumer.selectedAccount(this.costumer.getAccounts().get(i));
+                    }
+                }
+
+            }
+            else if(this.costumer.getAccounts().size() == 1){
+                this.costumer.selectedAccount(this.costumer.getAccounts().get(0));
+            }
+            else{
+                System.out.println("You don't have an account");
+            }
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        System.out.println(this.costumer.getSelectedAccount().getAccount_number());
+        //System.out.println(this.costumer.getAccount().getBranch_name());
+        //System.out.println(this.costumer.getAccount().getBalance());
+        return true;
+    }
 }

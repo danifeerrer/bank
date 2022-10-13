@@ -28,11 +28,11 @@ public class SaveRecords {
         this.out = out;
         this.in = in;
     }
-    public void inputData(BankAccount some_account){
+    public void inputData(objects.BankAccount some_account){
         out.writeObject(some_account);
     }
-    public BankAccount readData(BankAccount some_account){
-        BankAccount toReturn = (BankAccount) in.readObject();
+    public objects.BankAccount readData(objects.BankAccount some_account){
+        objects.BankAccount toReturn = (objects.BankAccount) in.readObject();
         return toReturn;
     }
 }
