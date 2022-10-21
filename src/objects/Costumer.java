@@ -3,13 +3,15 @@ package objects;
 import java.util.ArrayList;
 
 public class Costumer {
+    private int id;
     private String name;
     private String street;
     private String city;
 
     private Account selectedAccount;
     private ArrayList<Account> accounts;
-    public Costumer(String name, String street, String city){
+    public Costumer(int id, String name, String street, String city){
+        this.id = id;
         this.name = name;
         this.street = street;
         this.city = city;
@@ -19,6 +21,10 @@ public class Costumer {
 
         accounts.add(account);
 
+    }
+
+    public int getId() {
+        return id;
     }
 
     public Account getAccount() {
