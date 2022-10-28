@@ -428,14 +428,18 @@ public class Engine {
         return false;
     }
     public void menu(){
-        System.out.println("\n1. Create an account-> ");
-        System.out.println("2. Login->");
-        System.out.println("3. Add money in your account->");
-        System.out.println("4. Withdraw money from your account -> ");
-        System.out.println("5. Print information about your account-> ");
-        System.out.println("6. Wire transfer->");
-        System.out.println("7. Show movements->");
-        System.out.println("8. Logout->");
-        System.out.println("9. Close application-> \n");
+        if(this.costumer.getSelectedAccount() == null){
+            System.out.println("\n1. Create an account-> ");
+            System.out.println("2. Login->");
+            System.out.println("3. Close application-> \n");
+        }else{
+            System.out.println("1. Add money in your account->");
+            System.out.println("2. Withdraw money from your account -> ");
+            System.out.println("3. Print information about your account-> ");
+            System.out.println("4. Wire transfer->");
+            System.out.println("5. Show movements->");
+            System.out.println("6. Logout->");
+            System.out.println("7. Close application-> \n");
+        }
     }
 }
