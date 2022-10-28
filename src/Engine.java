@@ -1,6 +1,8 @@
-import objects.Account;
-import objects.BankAccount;
-import objects.Costumer;
+import objects.*;
+
+import services.*;
+
+import java.nio.file.attribute.UserPrincipal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.sql.*;
@@ -12,10 +14,11 @@ import java.util.ArrayList;
 public class Engine {
 
     Scanner input = new Scanner(System.in);
+
+    UserService userServices = new UserService();
+
     private Costumer costumer;
-    private String url = "jdbc:mysql://localhost:3306/bank";
-    private String username = "root";
-    private String password = "$contraseña$11";
+
 
     private static int idOutcome = 19;
 
@@ -24,6 +27,8 @@ public class Engine {
         boolean run = true;
         BankAccount account_menu = null;
         ATM atm_menu = null;
+
+
         while(run){
             menu();
             String numero = input.nextLine();
@@ -32,37 +37,42 @@ public class Engine {
                 numero = input.nextLine();
             }
             int number = Integer.parseInt(numero);
-            switch(number){
-                case 1:
-                    createAccount();
-                    break;
-                case 2:
-                    login();
-                    break;
-                case 3:
-                    addmoney();
-                    break;
-                case 4:
-                    withdraw();
-                    break;
-                case 5:
-                    info();
-                    break;
-                case 6:
-                    transaction();
-                    break;
-                case 7:
-                    movements();
-                case 118:
-                    admin();
-                    break;
-                case 8:
-                    this.costumer = null;
-                    break;
-                case 9:
-                    System.out.println("Saliste de la aplicacion");
-                    run = false;
-                    break;
+            if(this.costumer == null){
+                switch(number){
+                    case 1:
+                        createAccount();
+                        break;
+                    case 2:
+                        userService.login(input );
+                        break;
+                    case 3:
+                        System.out.println("Saliste de la aplicacion");
+                        run = false;
+                        break;
+                }
+            }else{
+                switch(number){
+                    case 1:
+                        addmoney();
+                        break;
+                    case 2:
+                        withdraw();
+                        break;
+                    case 3:
+                        info();
+                        break;
+                    case 4:
+                        transaction();
+                        break;
+                    case 5:
+                        movements();
+                    case 6:
+                        admin();
+                        break;
+                    case 7:
+                        this.costumer = null;
+                        break;
+                }
             }
         }
     }
@@ -247,60 +257,6 @@ public class Engine {
         return resultado;
     }
 
-    public void login(){
-        System.out.print("Enter your id: ");
-        int personal_id = Integer.parseInt(input.nextLine());
-        System.out.print("Enter your password: ");
-        String password1 = input.nextLine();
-        try{
-
-            Connection connection = DriverManager.getConnection(this.url, this.username,this.password);
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select* from customer where id='"+ personal_id + "' " +
-                    "AND password='" + password1 + "'");
-
-            if(!resultSet.isBeforeFirst()){
-                System.out.println("\nThere's no profile with this id or password");
-                return;
-            }
-            while(resultSet.next()) {
-
-                this.costumer = new Costumer(
-                        resultSet.getInt("id"),
-                        resultSet.getString("customer_name"),
-                        resultSet.getString("customer_street"),
-                        resultSet.getString("customer_city"));
-                System.out.println("\nYou've logged in");
-            }
-            int account_id = 0;
-            resultSet = statement.executeQuery("select account_id from customer_account where customer_id=" + this.costumer.getId() +";");
-            ArrayList<Integer> ids = new ArrayList<>();
-            while(resultSet.next()){
-                ids.add(resultSet.getInt("account_id"));
-            }
-            if(ids.size() > 1){
-                System.out.println("Choose the id of the account you'd like to use: ");
-                for(int i = 0; i < ids.size(); i++){
-                    System.out.print(ids.get(i) + " ");
-                }
-                account_id = Integer.parseInt(input.nextLine());
-            }
-            else if(ids.size() == 1){
-                account_id = ids.get(0);
-            }
-            resultSet = statement.executeQuery("select id, account_number, branch_name, balance from account where id="+account_id+ ";");
-            while(resultSet.next()){
-                this.costumer.selectedAccount(new Account(resultSet.getInt("id"),
-                        resultSet.getString("account_number"),
-                        resultSet.getString("branch_name"),
-                        resultSet.getDouble("balance")));
-
-            }
-
-        } catch(Exception e){
-            e.printStackTrace();
-        }
-    }
     public void createAccount(){
         System.out.println("If you want to create an account and a customer profile associate with this profile, press 1: \n");
         System.out.println("If you already have a profile, press 2: \n");
