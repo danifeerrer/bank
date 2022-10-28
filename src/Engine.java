@@ -6,6 +6,8 @@ import java.util.Date;
 import java.sql.*;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.ArrayList;
+
 
 public class Engine {
 
@@ -16,6 +18,8 @@ public class Engine {
     private String password = "$contraseña$11";
 
     private static int idOutcome = 19;
+
+    private static int idIncome = 18;
     public void work() {
         boolean run = true;
         BankAccount account_menu = null;
@@ -49,24 +53,45 @@ public class Engine {
                     break;
                 case 7:
                     movements();
+                case 118:
+                    admin();
+                    break;
                 case 8:
                     this.costumer = null;
                     break;
                 case 9:
                     System.out.println("Saliste de la aplicacion");
                     run = false;
+                    break;
             }
         }
     }
 
+    private void admin() {
+        try{
+            Connection connection = DriverManager.getConnection(this.url, this.username, this.password);
+            Statement statement = connection.createStatement();
+            System.out.println("Feel free to change whatever you'd like to change");
+            String update;
+            System.out.println("Write the SQL statement for updating data(insert, delete)");
+            update = input.nextLine();
+            statement.executeUpdate(update);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 
 
     private void withdraw() {
-        if()
-        if(this.costumer.getSelectedAccount() == null){
-            System.out.println("First you need to login first");
+        if(this.costumer == null){
+            System.out.println("First you need to create a profile");
+            return;
         }
-        System.out.println("Enter the amount you'd like to substract");
+        if(this.costumer.getSelectedAccount() == null){
+            System.out.println("First you need to create an account");
+            return;
+        }
+        System.out.println("Enter the amount you'd like to withdraw");
         Double moneyToSubstract = Double.parseDouble(input.nextLine());
         if(moneyToSubstract < 0){
             System.out.println("Please provide a positive amount");
@@ -84,7 +109,7 @@ public class Engine {
                     this.costumer.getSelectedAccount().getAccount_number() + "';");
             statement.executeUpdate("insert into movements (time_and_date, from_account, to_account, transaction," +
                     " customer_in_charge)" + " VALUES ('"+formatter.format(date)+"', "+
-                    this.costumer.getSelectedAccount().getId() +", " + this.costumer.getSelectedAccount().getId() +
+                    this.costumer.getSelectedAccount().getId() +", " + idOutcome +
                     ", 'Withdraw'" + ", " + this.costumer.getId() +");");
         }catch(Exception e){
             e.printStackTrace();
@@ -94,16 +119,18 @@ public class Engine {
 
     private void movements(){
         if(this.costumer == null){
-            System.out.println("First you need to login");
+            System.out.println("First you need to create a profile");
         }
         else if(this.costumer.getSelectedAccount() == null){
             System.out.println("You'll need to create an account");
+
         }
         else{
             try{
                 Connection connection = DriverManager.getConnection(this.url, this.username, this.password);
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery("select time_and_date, transaction from movements;");
+                ResultSet resultSet = statement.executeQuery("select time_and_date, transaction from movements where" +
+                        " from_account=" + this.costumer.getSelectedAccount().getId() + ";");
                 while(resultSet.next()){
                     System.out.println(resultSet.getString("transaction") + " was made the " +
                             resultSet.getString("time_and_date"));
@@ -115,8 +142,13 @@ public class Engine {
     }
 
     private void addmoney() {
+        if(this.costumer == null){
+            System.out.println("First you need to create a profile");
+            return;
+        }
         if(this.costumer.getSelectedAccount() == null){
             System.out.println("You need to login first");
+            return;
         }
         System.out.println("Enter the amount you'd like to add");
         Double moneyToAdd = Double.parseDouble(input.nextLine());
@@ -135,7 +167,7 @@ public class Engine {
                     + "where account_number='" +
                     this.costumer.getSelectedAccount().getAccount_number() + "';");
             statement.executeUpdate("insert into movements (time_and_date, from_account, to_account, transaction, customer_in_charge)" +
-                    " VALUES ('"+formatter.format(date)+"', "+ this.costumer.getSelectedAccount().getId() +", "+ this.costumer.getSelectedAccount().getId() + ", 'Adding'"
+                    " VALUES ('"+formatter.format(date)+"', "+ idIncome +", "+ this.costumer.getSelectedAccount().getId() + ", 'Adding'"
                     + ", " + this.costumer.getId() +");");
         }catch(Exception e){
             e.printStackTrace();
@@ -143,8 +175,13 @@ public class Engine {
         System.out.println(this.costumer.getSelectedAccount().getBalance());
     }
     private void transaction(){
+        if(this.costumer == null){
+            System.out.println("First you need to create a profile");
+            return;
+        }
         if(this.costumer.getSelectedAccount() == null){
-            System.out.println("You need to login first");
+            System.out.println("You need to create an account first");
+            return;
         }
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Date date = new Date();
@@ -185,7 +222,6 @@ public class Engine {
             return;
         }
         System.out.println(this.costumer.getAccounts().toString());
-
     }
 
     private static boolean isDouble(String parametro){
@@ -211,79 +247,82 @@ public class Engine {
         return resultado;
     }
 
-    public boolean login(){
-        System.out.print("Enter the name of your account: ");
-        String name_account = input.nextLine();
+    public void login(){
+        System.out.print("Enter your id: ");
+        int personal_id = Integer.parseInt(input.nextLine());
         System.out.print("Enter your password: ");
         String password1 = input.nextLine();
         try{
 
             Connection connection = DriverManager.getConnection(this.url, this.username,this.password);
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select* from customer where customer_name='"+ name_account + "' " +
+            ResultSet resultSet = statement.executeQuery("select* from customer where id='"+ personal_id + "' " +
                     "AND password='" + password1 + "'");
-            while(resultSet.next()){
+
+            if(!resultSet.isBeforeFirst()){
+                System.out.println("\nThere's no profile with this id or password");
+                return;
+            }
+            while(resultSet.next()) {
+
                 this.costumer = new Costumer(
                         resultSet.getInt("id"),
                         resultSet.getString("customer_name"),
                         resultSet.getString("customer_street"),
                         resultSet.getString("customer_city"));
-                System.out.println("Has entrado");
+                System.out.println("\nYou've logged in");
             }
-            System.out.println(this.costumer.getId());
+            int account_id = 0;
             resultSet = statement.executeQuery("select account_id from customer_account where customer_id=" + this.costumer.getId() +";");
-            resultSet.next();
-            int account_id = resultSet.getInt("account_id");
+            ArrayList<Integer> ids = new ArrayList<>();
+            while(resultSet.next()){
+                ids.add(resultSet.getInt("account_id"));
+            }
+            if(ids.size() > 1){
+                System.out.println("Choose the id of the account you'd like to use: ");
+                for(int i = 0; i < ids.size(); i++){
+                    System.out.print(ids.get(i) + " ");
+                }
+                account_id = Integer.parseInt(input.nextLine());
+            }
+            else if(ids.size() == 1){
+                account_id = ids.get(0);
+            }
             resultSet = statement.executeQuery("select id, account_number, branch_name, balance from account where id="+account_id+ ";");
             while(resultSet.next()){
-                this.costumer.addAccount(new Account(resultSet.getInt("id"),
+                this.costumer.selectedAccount(new Account(resultSet.getInt("id"),
                         resultSet.getString("account_number"),
                         resultSet.getString("branch_name"),
                         resultSet.getDouble("balance")));
 
             }
-            if (this.costumer.getAccounts().size() > 1){
-                System.out.println("Choose one of your accounts: ");
-                this.costumer.getAccounts().forEach((account -> System.out.println(" - " + account.getAccount_number())
-                        ));
-                String account_choosen = input.nextLine();
-                for(int i = 0; i < this.costumer.getAccounts().size(); i++){
-                    if (this.costumer.getAccounts().get(i).getAccount_number() == account_choosen){
-                        this.costumer.selectedAccount(this.costumer.getAccounts().get(i));
-                    }
-                }
-
-            }
-            else if(this.costumer.getAccounts().size() == 1){
-                this.costumer.selectedAccount(this.costumer.getAccounts().get(0));
-            }
-            else{
-                System.out.println("You don't have an account");
-            }
 
         } catch(Exception e){
             e.printStackTrace();
         }
-        System.out.println(this.costumer.getSelectedAccount().getAccount_number());
-        //System.out.println(this.costumer.getAccount().getBranch_name());
-        //System.out.println(this.costumer.getAccount().getBalance());
-        return true;
     }
     public void createAccount(){
-        int id;
-        System.out.print("Enter your name: ");
-        String name = (input.nextLine());
-        System.out.print("Enter your street: ");
-        String street = input.nextLine();
-        System.out.print("Enter your city: ");
-        String city = input.nextLine();
-        System.out.print("Enter your password:");
-        String password = input.nextLine();
-        System.out.println("If you want to create an account associate with this profile, press 1: ");
-        int create_account = Integer.parseInt(input.nextLine());
+        System.out.println("If you want to create an account and a customer profile associate with this profile, press 1: \n");
+        System.out.println("If you already have a profile, press 2: \n");
+        String create_account_str = input.nextLine();
+        while(!isNumeric(create_account_str)){
+            System.out.println("Please provide a numeric value: ");
+            create_account_str = input.nextLine();
+        }
+        int create_account = Integer.parseInt(create_account_str);
         boolean run2 = false;
-        if(create_account == 1){
-            run2 = true;
+        boolean run3 = false;
+        while(create_account != 1 || create_account != 2){;
+            create_account = Integer.parseInt(input.nextLine());
+            if(create_account == 1){
+                run2 = true;
+                break;
+            }
+            if(create_account == 2){
+                run3 = true;
+                break;
+            }
+            System.out.println("Please provide just one of the available numbers: 1 or 2");
         }
 
         try{
@@ -292,29 +331,77 @@ public class Engine {
             Statement statement = connection.createStatement();
 
             while(run2){
-                System.out.println("Enter a five word letter with a capital letter at the beginning \nfollowed by an underscore and a 3 digit number");
+                System.out.print("Enter your name: ");
+                String name = (input.nextLine());
+                System.out.print("Enter your street: ");
+                String street = input.nextLine();
+                System.out.print("Enter your city: ");
+                String city = input.nextLine();
+                System.out.print("Enter your password:");
+                String password = input.nextLine();
+                System.out.println("Enter a five word letter with a capital letter at the \nbeginning followed by " +
+                        "an underscore and a 3 digit number");
                 String account_number2 = input.nextLine();
-                if(checkAccountExist(statement, account_number2)){
+                while(checkAccountExist(statement, account_number2)){
                     System.out.println("Already exists");
-                    break;
+                    System.out.println("Enter a new five word letter:");
+                    account_number2 = input.nextLine();
                 }
                 System.out.println("Enter your closest bank branch: ");
                 String branch_name = input.nextLine();
                 System.out.println("Enter your balance: ");
-                Double balance = Double.parseDouble(input.nextLine());
+                String balance_str = input.nextLine();
+                while(!isDouble(balance_str)){
+                    System.out.println("Please provide a number");
+                    balance_str = input.nextLine();
+                }
+                Double balance = Double.parseDouble(balance_str);
                 if(account_number2.length() == 5){
-                    //statement.executeUpdate("insert into `bank`.`depositor`(`customer_name`, `account_number`) VALUES ('" + name + "', '" + account_number2 + "');");
-                    statement.executeUpdate("insert into `bank`.`account`(`account_number`, `branch_name`, `balance`) VALUES ('" + account_number2 + "', '"+ branch_name + "', " + balance + ");");
-                    ResultSet resultSet = statement.executeQuery("select id from `bank`.`account` where account_number='" +account_number2+ "';" );
+                    statement.executeUpdate("insert into `bank`.`account`(`account_number`, `branch_name`, `balance`)" +
+                            " VALUES ('" + account_number2 + "', '"+ branch_name + "', " + balance + ");");
+                    ResultSet resultSet = statement.executeQuery("select id from `bank`.`account` " +
+                            "where account_number='" +account_number2+ "';" );
                     resultSet.next();
                     int account_id = resultSet.getInt("id");
-                    statement.executeUpdate("insert into `bank`.`customer`(`customer_name`, `customer_street`, `customer_city`, `password`) VALUES ('" + name + "', '"  + street + "', '" + city + "', '" + password + "');");
-                    ResultSet resultSet2 = statement.executeQuery("select id from `bank`.`customer` where customer_name='" +name+ "' AND password='" +password+ "';" );
-                    resultSet2.next();
-                    int customer_id = resultSet2.getInt("id");
-                    statement.executeUpdate("insert into `bank`.`customer_account`(`account_id`, `customer_id`) VALUES ("+account_id+", "+customer_id+");");
+                    statement.executeUpdate("insert into `bank`.`customer`(`customer_name`, `customer_street`," +
+                            " `customer_city`, `password`) VALUES ('" + name + "', '"  + street + "', '" +
+                            city + "', '" + password + "');");
+                    resultSet = statement.executeQuery("select id from `bank`.`customer` where customer_name='"
+                            +name+ "' AND password='" +password+ "';" );
+                    resultSet.next();
+                    int customer_id = resultSet.getInt("id");
+                    statement.executeUpdate("insert into `bank`.`customer_account`(`account_id`, `customer_id`) " +
+                            "VALUES ("+account_id+", "+customer_id+");");
+                    run2 = false;
                 }
-                break;
+
+            }
+            while(run3){
+                System.out.println("Enter a five word letter with a capital letter at the beginning \n" +
+                        "followed by an underscore and a 3 digit number");
+                String new_account_number = input.nextLine();
+                if(new_account_number.length() != 5){
+                    System.out.println("The length of the account number you provided is not correct");
+                }
+                if(checkAccountExist(statement, new_account_number)){
+                    System.out.println("This account already exists, provide a new number");
+                }
+                System.out.println("Enter your closest bank branch: ");
+                String branch_name = input.nextLine();
+                System.out.println("Enter your balance: ");
+                String balance_str = input.nextLine();
+                while(!isDouble(balance_str)){
+                    System.out.println("Please provide a number: ");
+                    balance_str = input.nextLine();
+                }
+                Double balance = Double.parseDouble(balance_str);
+                statement.executeUpdate("insert into `bank`.`account`(`account_number`, `branch_name`, `balance`) VALUES ('" + new_account_number + "', '"+ branch_name + "', " + balance + ");");
+                ResultSet resultSet = statement.executeQuery("select id from `bank`.`account` where account_number='" + new_account_number + "';" );
+                resultSet.next();
+                int account_id = resultSet.getInt("id");
+                statement.executeUpdate("insert into `bank`.`customer_account`(`customer_id`, `account_id`) VALUES ("+this.costumer.getId()+ ", " +
+                        account_id + ");");
+                run3 = false;
             }
 
         }catch(Exception e){
@@ -326,7 +413,15 @@ public class Engine {
         ResultSet resultSet = statement.executeQuery("select* from `bank`.`account` where account_number='" + account_number2 + "';");
         while(resultSet.next()){
             if(Objects.equals(resultSet.getString("account_number"), account_number2)){
-                System.out.println(resultSet.getString("account_number"));
+                return true;
+            }
+        }
+        return false;
+    }
+    private boolean checkCostumerExists(ResultSet resultSet, int customer_id, String password) throws SQLException{
+        while(resultSet.next()){
+            if(Objects.equals(resultSet.getInt("id"), customer_id) && Objects.equals(resultSet.getString("password"), password)){
+                System.out.println(resultSet.getString("id"));
                 return true;
             }
         }
