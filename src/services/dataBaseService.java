@@ -13,8 +13,8 @@ public class dataBaseService {
     private String password = "$contraseña$11";
 
 
-    public void select(String table, Map<String, String> whereArguments ){
-
+    public ResultSet select(String table, Map<String, String> whereArguments ){
+        ResultSet resultSet = null;
         try{
 
             Connection connection = DriverManager.getConnection(this.url, this.username,this.password);
@@ -22,22 +22,17 @@ public class dataBaseService {
             String query = "select* from" + table;
             // Vamos a recorrer el mapa para ver las condiciones del where
             if(whereArguments != null){
-                query.concat("where = ");
-
+                query.concat(" where");
                 for (Map.Entry<String, String> entry : whereArguments.entrySet()) {
-                    query.concat()
-                    System.out.println("clave=" + entry.getKey() + ", valor=" + entry.getValue());
+                    query.concat(" "+ entry.getKey() + "= " +entry.getValue());
                 }
             }
-
-
-            ResultSet resultSet = statement.executeQuery( where id='"+ personal_id + "' " +
-                    "AND password='" + password1 + "'");
-
+            resultSet = statement.executeQuery(query + ";");
 
         } catch(Exception e){
             e.printStackTrace();
         }
 
+        return resultSet;
     }
 }

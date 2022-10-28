@@ -5,6 +5,7 @@ import Engine;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -29,6 +30,8 @@ public class UserService   {
                 put("password", password1);
             }
         };
+
+        ResultSet resultSet = dataBaseService.select("tabla", loginArguments);
 
 
 
