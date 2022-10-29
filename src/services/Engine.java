@@ -1,34 +1,32 @@
-import objects.*;
+package services;
 
-import services.*;
 
-import java.nio.file.attribute.UserPrincipal;
+import objects.Account;
+import objects.BankAccount;
+import objects.Costumer;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 import java.sql.*;
-import java.util.Objects;
-import java.util.Scanner;
-import java.util.ArrayList;
+import java.util.Date;
 
 
 public class Engine {
 
     Scanner input = new Scanner(System.in);
-
-    UserService userServices = new UserService();
-
-    private Costumer costumer;
-
+    public static Costumer costumer;
+    private String url = "jdbc:mysql://localhost:3306/bank";
+    private String username = "root";
+    private String password = "$contraseña$11";
 
     private static int idOutcome = 19;
 
     private static int idIncome = 18;
+    private static UserService userService;
+    static dataBaseService dataBaseService = new dataBaseService();
+
     public void work() {
         boolean run = true;
         BankAccount account_menu = null;
-        ATM atm_menu = null;
-
-
         while(run){
             menu();
             String numero = input.nextLine();
@@ -37,42 +35,37 @@ public class Engine {
                 numero = input.nextLine();
             }
             int number = Integer.parseInt(numero);
-            if(this.costumer == null){
-                switch(number){
-                    case 1:
-                        createAccount();
-                        break;
-                    case 2:
-                        userService.login(input );
-                        break;
-                    case 3:
-                        System.out.println("Saliste de la aplicacion");
-                        run = false;
-                        break;
-                }
-            }else{
-                switch(number){
-                    case 1:
-                        addmoney();
-                        break;
-                    case 2:
-                        withdraw();
-                        break;
-                    case 3:
-                        info();
-                        break;
-                    case 4:
-                        transaction();
-                        break;
-                    case 5:
-                        movements();
-                    case 6:
-                        admin();
-                        break;
-                    case 7:
-                        this.costumer = null;
-                        break;
-                }
+            switch(number){
+                case 1:
+                    createAccount();
+                    break;
+                case 2:
+                    userService.login();
+                    break;
+                case 3:
+                    addmoney();
+                    break;
+                case 4:
+                    withdraw();
+                    break;
+                case 5:
+                    info();
+                    break;
+                case 6:
+                    transaction();
+                    break;
+                case 7:
+                    movements();
+                case 118:
+                    admin();
+                    break;
+                case 8:
+                    this.costumer = null;
+                    break;
+                case 9:
+                    System.out.println("Saliste de la aplicacion");
+                    run = false;
+                    break;
             }
         }
     }
@@ -173,12 +166,25 @@ public class Engine {
             Date date = new Date();
             Connection connection = DriverManager.getConnection(this.url, this.username, this.password);
             Statement statement = connection.createStatement();
-            statement.executeUpdate("update account set balance=" + this.costumer.getSelectedAccount().getBalance()
-                    + "where account_number='" +
-                    this.costumer.getSelectedAccount().getAccount_number() + "';");
-            statement.executeUpdate("insert into movements (time_and_date, from_account, to_account, transaction, customer_in_charge)" +
-                    " VALUES ('"+formatter.format(date)+"', "+ idIncome +", "+ this.costumer.getSelectedAccount().getId() + ", 'Adding'"
-                    + ", " + this.costumer.getId() +");");
+            LinkedHashMap<String, String> updateArguments = new LinkedHashMap<>();
+            updateArguments.put("balance", String.valueOf(this.costumer.getSelectedAccount().getBalance()));
+            updateArguments.put("id", String.valueOf(this.costumer.getSelectedAccount().getId()));
+
+
+            dataBaseService.update("account",updateArguments);
+            //statement.executeUpdate("update account set balance=" + this.costumer.getSelectedAccount().getBalance()
+            //        + "where account_number='" + this.costumer.getSelectedAccount().getAccount_number() + "';");
+            Map<String, String> insertArguments = new HashMap<String, String>();
+            insertArguments.put("time_and_date", "'"+formatter.format(date) + "'");
+            insertArguments.put("from_account", String.valueOf(idIncome));
+            insertArguments.put("to_account", String.valueOf(this.costumer.getSelectedAccount().getId()));
+            insertArguments.put("transaction", "'Adding'");
+            insertArguments.put("customer_in_charge" ,String.valueOf(this.costumer.getId()));
+
+            //statement.executeUpdate("insert into movements (time_and_date, from_account, to_account, transaction, customer_in_charge)" +
+            //        " VALUES ('"+formatter.format(date)+"', "+ idIncome +", "+ this.costumer.getSelectedAccount().getId() + ", 'Adding'"
+            //        + ", " + this.costumer.getId() +");");
+            dataBaseService.insert("movements", insertArguments);
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -214,9 +220,16 @@ public class Engine {
                 statement.executeUpdate("update account set balance=" + this.costumer.getSelectedAccount().getBalance()
                         + "where account_number='" + this.costumer.getSelectedAccount().getAccount_number() + "';");
                 statement.executeUpdate("update account set balance=" + balanceOtherAccount +" where id='"+ idOtherAccount +"';");
-                statement.executeUpdate("insert into movements (time_and_date, from_account, to_account, transaction, customer_in_charge)" +
-                        " VALUES ('"+formatter.format(date)+"', "+ this.costumer.getSelectedAccount().getId() +", "+ idOtherAccount + ", 'Transfering'"
-                        + ", " + this.costumer.getId() +");");
+                Map<String, String> insertArguments = new HashMap<>();
+                insertArguments.put("time_and_date", "'" + formatter.format(date)+ "'");
+                insertArguments.put("from_account", String.valueOf(this.costumer.getSelectedAccount().getId()));
+                insertArguments.put("to_account", String.valueOf(idOtherAccount));
+                insertArguments.put("transaction", "'Transfering'");
+                insertArguments.put("customer_in_charge", String.valueOf(this.costumer.getId()));
+                dataBaseService.insert("movements", insertArguments);
+                //statement.executeUpdate("insert into movements (time_and_date, from_account, to_account, transaction, customer_in_charge)" +
+                //        " VALUES ('"+formatter.format(date)+"', "+ this.costumer.getSelectedAccount().getId() +", "+ idOtherAccount + ", 'Transfering'"
+                //        + ", " + this.costumer.getId() +");");
 
             }catch(Exception e){
                 e.printStackTrace();
@@ -257,6 +270,60 @@ public class Engine {
         return resultado;
     }
 
+    public void login(){
+        System.out.print("Enter your id: ");
+        int personal_id = Integer.parseInt(input.nextLine());
+        System.out.print("Enter your password: ");
+        String password1 = input.nextLine();
+        try{
+
+            Connection connection = DriverManager.getConnection(this.url, this.username,this.password);
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("select* from customer where id='"+ personal_id + "' " +
+                    "AND password='" + password1 + "'");
+
+            if(!resultSet.isBeforeFirst()){
+                System.out.println("\nThere's no profile with this id or password");
+                return;
+            }
+            while(resultSet.next()) {
+
+                this.costumer = new Costumer(
+                        resultSet.getInt("id"),
+                        resultSet.getString("customer_name"),
+                        resultSet.getString("customer_street"),
+                        resultSet.getString("customer_city"));
+                System.out.println("\nYou've logged in");
+            }
+            int account_id = 0;
+            resultSet = statement.executeQuery("select account_id from customer_account where customer_id=" + this.costumer.getId() +";");
+            ArrayList<Integer> ids = new ArrayList<>();
+            while(resultSet.next()){
+                ids.add(resultSet.getInt("account_id"));
+            }
+            if(ids.size() > 1){
+                System.out.println("Choose the id of the account you'd like to use: ");
+                for(int i = 0; i < ids.size(); i++){
+                    System.out.print(ids.get(i) + " ");
+                }
+                account_id = Integer.parseInt(input.nextLine());
+            }
+            else if(ids.size() == 1){
+                account_id = ids.get(0);
+            }
+            resultSet = statement.executeQuery("select id, account_number, branch_name, balance from account where id="+account_id+ ";");
+            while(resultSet.next()){
+                this.costumer.selectedAccount(new Account(resultSet.getInt("id"),
+                        resultSet.getString("account_number"),
+                        resultSet.getString("branch_name"),
+                        resultSet.getDouble("balance")));
+
+            }
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
     public void createAccount(){
         System.out.println("If you want to create an account and a customer profile associate with this profile, press 1: \n");
         System.out.println("If you already have a profile, press 2: \n");
@@ -384,18 +451,16 @@ public class Engine {
         return false;
     }
     public void menu(){
-        if(this.costumer.getSelectedAccount() == null){
-            System.out.println("\n1. Create an account-> ");
-            System.out.println("2. Login->");
-            System.out.println("3. Close application-> \n");
-        }else{
-            System.out.println("1. Add money in your account->");
-            System.out.println("2. Withdraw money from your account -> ");
-            System.out.println("3. Print information about your account-> ");
-            System.out.println("4. Wire transfer->");
-            System.out.println("5. Show movements->");
-            System.out.println("6. Logout->");
-            System.out.println("7. Close application-> \n");
-        }
+
+        System.out.println("\n1. Create an account-> ");
+        System.out.println("2. Login->");
+        System.out.println("3. Add money in your account->");
+        System.out.println("4. Withdraw money from your account -> ");
+        System.out.println("5. Print information about your account-> ");
+        System.out.println("6. Wire transfer->");
+        System.out.println("7. Show movements->");
+        System.out.println("8. Logout->");
+        System.out.println("9. Close application-> \n");
+
     }
 }
