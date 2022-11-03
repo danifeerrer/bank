@@ -14,16 +14,14 @@ public class UserService   {
     public static Scanner input = new Scanner(System.in);
     static dataBaseService dataBaseService = new dataBaseService();
 
-
-
     public static void login(){
         System.out.print("Enter your id: ");
-        String personal_id = " ";
+        String personal_id;
         personal_id = input.nextLine();
         System.out.print("Enter your password: ");
         String password1 = input.nextLine();
 
-        Map<String, String> loginArguments = new HashMap<String, String>();
+        Map<String, String> loginArguments = new HashMap<>();
 
         loginArguments.put("id", personal_id );
         loginArguments.put("password", password1);
@@ -59,8 +57,8 @@ public class UserService   {
 
             if(ids.size() > 1){
                 System.out.print("Choose the id of the account you'd like to use: ");
-                for(int i = 0; i < ids.size(); i++){
-                    System.out.print(ids.get(i) + " ");
+                for (Integer id : ids) {
+                    System.out.print(id + " ");
                 }
                 System.out.println("\n");
                 account_id = Integer.parseInt(input.nextLine());

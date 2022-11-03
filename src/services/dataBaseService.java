@@ -4,19 +4,18 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class dataBaseService {
 
-    private String url = "jdbc:mysql://localhost:3306/bank";
-    private String username = "root";
-    private String password = "$contraseña$11";
+    private final String url = "jdbc:mysql://localhost:3306/bank";
+    private final String username = "root";
+    private final String password = "$contraseña$11";
 
     public ResultSet select(String column ,String table, Map<String, String> whereArguments ){
         ResultSet resultSet = null;
-        String query = "select " + column + " from " + table ;
+        StringBuilder query = new StringBuilder("select " + column + " from " + table);
 
 
         try{
@@ -25,25 +24,22 @@ public class dataBaseService {
             // Vamos a recorrer el mapa para ver las condiciones del where
             if(whereArguments != null){
                 if(whereArguments.size() == 1){
-                    query += " where";
+                    query.append(" where");
                     for (Map.Entry<String, String> entry : whereArguments.entrySet()) {
-                        query += " " + entry.getKey() + "= '" + entry.getValue() + "'";
+                        query.append(" ").append(entry.getKey()).append("= '").append(entry.getValue()).append("'");
                     }
                 }
-                else if(whereArguments.size() != 1){
-                    query += " where";
+                else {
+                    query.append(" where");
                     int i = 0;
                     for (Map.Entry<String, String> entry : whereArguments.entrySet()) {
                         i++; //select from customer where password = mdz12 and id = '30'
                         if (i != whereArguments.size()){
-                            query += " " + entry.getKey() + "= '" + entry.getValue() + "' and";
+                            query.append(" ").append(entry.getKey()).append("= '").append(entry.getValue()).append("' and");
                             //i = 1
                         }
-                        else if(i == whereArguments.size()){
-                            query += " " + entry.getKey() + "= '" + entry.getValue() + "'";
-                        }
-                        else{
-                            break;
+                        else {
+                            query.append(" ").append(entry.getKey()).append("= '").append(entry.getValue()).append("'");
                         }
                     }
                 }
@@ -60,7 +56,7 @@ public class dataBaseService {
         return resultSet;
     }
     public void insert(String table, Map<String, String> insertArguments){
-        String query = "insert into " + table + "(";
+        StringBuilder query = new StringBuilder("insert into " + table + "(");
 
         try{
             Connection connection = DriverManager.getConnection(this.url, this.username, this.password);
@@ -70,35 +66,32 @@ public class dataBaseService {
                 for(Map.Entry<String, String> entry : insertArguments.entrySet()){
                     i++;
                     if(i == insertArguments.size()){
-                        query += entry.getKey();
+                        query.append(entry.getKey());
                     }
-                    else if(i != insertArguments.size()){
-                        query += entry.getKey() + " , ";
-                    }
-                    else{
-                        break;
+                    else {
+                        query.append(entry.getKey()).append(" , ");
                     }
                 }
-                query += ")VALUES(";
+                query.append(")VALUES(");
                 for(Map.Entry<String, String> entry : insertArguments.entrySet()){
                     j++;
                     if(j == insertArguments.size() - 1){
-                        query += entry.getValue() + ");";
+                        query.append(entry.getValue()).append(");");
                     }
                     else if(j != insertArguments.size()){
-                        query += entry.getValue() + ", ";
+                        query.append(entry.getValue()).append(", ");
                     }
 
                 }
             }
-            statement.executeUpdate(query);
+            statement.executeUpdate(query.toString());
 
         }catch(Exception e){
             e.printStackTrace();
         }
     }
     public void update(String table, LinkedHashMap<String, String> updateArguments){
-        String query = "update " + table + " set ";
+        StringBuilder query = new StringBuilder("update " + table + " set ");
         try{
             Connection connection = DriverManager.getConnection(this.url, this.username, this.password);
             Statement statement = connection.createStatement();
@@ -107,10 +100,10 @@ public class dataBaseService {
                 for(Map.Entry<String, String> entry : updateArguments.entrySet()){
                     i++;
                     if(i == 0){
-                        query += entry.getKey() + " = " + entry.getValue();
+                        query.append(entry.getKey()).append(" = ").append(entry.getValue());
                     }
                     if(i==1){
-                        query += " where " + entry.getKey() + " ='" + entry.getValue() +"' ;";
+                        query.append(" where ").append(entry.getKey()).append(" ='").append(entry.getValue()).append("' ;");
                     }
                 }
             }

@@ -1,37 +1,24 @@
 package services;
 
 
-import objects.Account;
 import objects.Customer;
-import java.text.SimpleDateFormat;
+
 import java.util.*;
-import java.sql.*;
-import java.util.Date;
 
 
 public class Engine {
 
     Scanner input = new Scanner(System.in);
     public static Customer customer;
-    private final String url = "jdbc:mysql://localhost:3306/bank";
-    private final String username = "root";
-    private final String password = "$contraseña$11";
-    private static AccountService accountService;
     public static int idOutcome = 19;
 
     public static int idIncome = 18;
-    private static UserService userService;
-    private static MovementService movementService;
-
-    static dataBaseService dataBaseService = new dataBaseService();
-
     public void work() {
-        boolean run = true;
-        while(run){
+        while(true){
             while(customer == null){
                 UserService.menu1();
                 String numero = input.nextLine();
-                while(!isNumeric(numero)){
+                while(isNumeric(numero)){
                     System.out.println("Write a name between 1 and 9: ");
                     numero = input.nextLine();
                 }
@@ -52,7 +39,7 @@ public class Engine {
             while(customer != null){
                 UserService.menu2();
                 String numero = input.nextLine();
-                while(!isNumeric(numero)){
+                while(isNumeric(numero)){
                     System.out.println("Write a name between 1 and 9: ");
                     numero = input.nextLine();
                 }
@@ -92,7 +79,7 @@ public class Engine {
         catch(NumberFormatException excepcion){
             resultado = false;
         }
-        return resultado;
+        return !resultado;
     }
 
 

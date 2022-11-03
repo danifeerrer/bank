@@ -18,7 +18,7 @@ public class AccountService {
             int create_account = Integer.parseInt(create_account_str);
             boolean run2 = false;
             boolean run3 = false;
-            if (create_account == 1 || create_account == 2){;
+            if (create_account == 1 || create_account == 2){
                 if(create_account == 1){
                     run2 = true;
                 }
@@ -43,7 +43,7 @@ public class AccountService {
                     String branch_name = input.nextLine();
                     System.out.println("Enter your balance: ");
                     String balance_str = input.nextLine();
-                    while(!isDouble(balance_str)){
+                    while(isDouble(balance_str)){
                         System.out.println("Please provide a number");
                         balance_str = input.nextLine();
                     }
@@ -86,11 +86,8 @@ public class AccountService {
                         insertArguments3.put("account_id", String.valueOf(account_id));
                         insertArguments3.put("customer_id", String.valueOf(customer_id));
                         dataBaseService.insert("customer_account", insertArguments3);
-                        run2 = false;
                     }
-                    else{
-                        run2 = false;
-                    }
+                    run2 = false;
 
                 }
                 while(run3){
@@ -111,7 +108,7 @@ public class AccountService {
                     String branch_name = input.nextLine();
                     System.out.println("Enter your balance: ");
                     String balance_str = input.nextLine();
-                    while(!isDouble(balance_str)){
+                    while(isDouble(balance_str)){
                         System.out.println("Please provide a number: ");
                         balance_str = input.nextLine();
                     }
@@ -147,17 +144,7 @@ public class AccountService {
             }
 
         }
-    private static boolean isNumeric(String parametro){
-        boolean resultado;
-        try {
-            Integer.parseInt(parametro);
-            resultado = true;
-        }
-        catch(NumberFormatException excepcion){
-            resultado = false;
-        }
-        return resultado;
-    }
+
     private static boolean isDouble(String parametro){
         boolean resultado;
         try {
@@ -167,7 +154,7 @@ public class AccountService {
         catch(NumberFormatException excepcion){
             resultado = false;
         }
-        return resultado;
+        return !resultado;
     }
     private static boolean checkAccountExist(String account_number2) throws SQLException {
         Map<String,String> inputArguments = new HashMap<>();
