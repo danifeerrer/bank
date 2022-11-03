@@ -5,7 +5,6 @@ public class Account {
     private String account_number;
     private double balance;
     private String branch_name;
-
     private int id;
     public Account(int id, String account_number, String branch_name, double balance){
         this.id = id;
@@ -22,9 +21,7 @@ public class Account {
         return id;
     }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
+
     public void addMoney(double moneyToAdd){
         this.balance += moneyToAdd;
     }
@@ -34,16 +31,8 @@ public class Account {
     public String getAccount_number() {
         return account_number;
     }
-
-    public void setAccount_number(String account_number) {
-        this.account_number = account_number;
-    }
-
     public String getBranch_name() {
         return branch_name;
     }
 
-    public void setBranch_name(String branch_name) {
-        this.branch_name = branch_name;
-    }
 }

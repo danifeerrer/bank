@@ -2,15 +2,15 @@ package objects;
 
 import java.util.ArrayList;
 
-public class Costumer {
+public class Customer {
     private int id;
-    private String name;
-    private String street;
-    private String city;
+    private final String name;
+    private final String street;
+    private final String city;
 
     private Account selectedAccount;
-    private ArrayList<Account> accounts;
-    public Costumer(int id, String name, String street, String city){
+    private final ArrayList<Account> accounts;
+    public Customer(int id, String name, String street, String city){
         this.id = id;
         this.name = name;
         this.street = street;

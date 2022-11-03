@@ -14,7 +14,6 @@ public class dataBaseService {
     private String username = "root";
     private String password = "$contraseña$11";
 
-
     public ResultSet select(String column ,String table, Map<String, String> whereArguments ){
         ResultSet resultSet = null;
         String query = "select " + column + " from " + table ;
@@ -50,7 +49,6 @@ public class dataBaseService {
                 }
 
             }
-            System.out.println(query);
             resultSet = statement.executeQuery(query + ";");
 
 
@@ -93,7 +91,6 @@ public class dataBaseService {
 
                 }
             }
-            System.out.println(query);
             statement.executeUpdate(query);
 
         }catch(Exception e){
@@ -117,7 +114,6 @@ public class dataBaseService {
                     }
                 }
             }
-            System.out.println(query);
             statement.executeUpdate(query + ";");
 
         }catch(Exception e){
