@@ -15,7 +15,7 @@ public class dataBaseService {
 
     public ResultSet select(String column ,String table, Map<String, String> whereArguments ){
         ResultSet resultSet = null;
-        StringBuilder query = new StringBuilder("select " + column + " from " + table);
+        String query = "select " + column + " from " + table;
 
 
         try{
@@ -23,38 +23,21 @@ public class dataBaseService {
             Statement statement = connection.createStatement();
             // Vamos a recorrer el mapa para ver las condiciones del where
             if(whereArguments != null){
-                if(whereArguments.size() == 1){
-                    query.append(" where");
-                    for (Map.Entry<String, String> entry : whereArguments.entrySet()) {
-                        query.append(" ").append(entry.getKey()).append("= '").append(entry.getValue()).append("'");
-                    }
+                //Si una linea esta en el if y en el else, sácala
+                query += " where";
+                for (Map.Entry<String, String> entry : whereArguments.entrySet()) {
+                    query += (" ") + (entry.getKey()) + ("= '") + (entry.getValue()) + ("' and");
                 }
-                else {
-                    query.append(" where");
-                    int i = 0;
-                    for (Map.Entry<String, String> entry : whereArguments.entrySet()) {
-                        i++; //select from customer where password = mdz12 and id = '30'
-                        if (i != whereArguments.size()){
-                            query.append(" ").append(entry.getKey()).append("= '").append(entry.getValue()).append("' and");
-                            //i = 1
-                        }
-                        else {
-                            query.append(" ").append(entry.getKey()).append("= '").append(entry.getValue()).append("'");
-                        }
-                    }
-                }
-
+                query = query.replaceAll("' and",";");
             }
-            resultSet = statement.executeQuery(query + ";");
-
-
-
+            resultSet = statement.executeQuery(query);
         } catch(Exception e){
             e.printStackTrace();
         }
 
         return resultSet;
     }
+
     public void insert(String table, Map<String, String> insertArguments){
         StringBuilder query = new StringBuilder("insert into " + table + "(");
 
