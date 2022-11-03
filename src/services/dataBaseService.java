@@ -28,7 +28,7 @@ public class dataBaseService {
                 for (Map.Entry<String, String> entry : whereArguments.entrySet()) {
                     query += (" ") + (entry.getKey()) + ("= '") + (entry.getValue()) + ("' and");
                 }
-                query = query.replaceAll("' and",";");
+                query = query.replaceAll(" and$",";");
             }
             resultSet = statement.executeQuery(query);
         } catch(Exception e){
@@ -39,33 +39,20 @@ public class dataBaseService {
     }
 
     public void insert(String table, Map<String, String> insertArguments){
-        StringBuilder query = new StringBuilder("insert into " + table + "(");
+        String query = "insert into " + table + "(";
 
         try{
             Connection connection = DriverManager.getConnection(this.url, this.username, this.password);
             Statement statement = connection.createStatement();
             if(insertArguments != null){
-                int i = 0, j = -1;
-                for(Map.Entry<String, String> entry : insertArguments.entrySet()){
-                    i++;
-                    if(i == insertArguments.size()){
-                        query.append(entry.getKey());
-                    }
-                    else {
-                        query.append(entry.getKey()).append(" , ");
-                    }
-                }
-                query.append(")VALUES(");
-                for(Map.Entry<String, String> entry : insertArguments.entrySet()){
-                    j++;
-                    if(j == insertArguments.size() - 1){
-                        query.append(entry.getValue()).append(");");
-                    }
-                    else if(j != insertArguments.size()){
-                        query.append(entry.getValue()).append(", ");
-                    }
+                String values = ")VALUES(";
 
+                for(Map.Entry<String, String> entry : insertArguments.entrySet()){
+                    query += (entry.getKey())+ (" , ");
+                    values += (entry.getValue()) + (", ");
                 }
+
+                query = (query + values).replaceAll(", $", ");") ;
             }
             statement.executeUpdate(query.toString());
 
