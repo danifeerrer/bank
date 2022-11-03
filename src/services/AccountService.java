@@ -8,66 +8,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static services.UserService.input;
-import static services.UserService.dataBaseService;
+import static services.CustomerService.input;
+import static services.CustomerService.dataBaseService;
 public class AccountService {
         public static void create_account(){
-            System.out.println("If you want to create an account and a customer profile associate with this profile, press 1: \n");
-            System.out.println("If you already have a profile, press 2: \n");
-            String create_account_str = (input.nextLine());
-            int create_account = Integer.parseInt(create_account_str);
-            boolean run2 = false;
-            boolean run3 = false;
-            if (create_account == 1 || create_account == 2){
-                if(create_account == 1){
-                    run2 = true;
-                }
-                if(create_account == 2){
-                    run3 = true;
-                }
-            }
-            else{
-                System.out.println("Please provide just one of the available numbers: 1 or 2");
-            }
+
             try{
                 while(run2){
-                    System.out.print("Enter your name: ");
-                    String name = (input.nextLine());
-                    System.out.print("Enter your street: ");
-                    String street = input.nextLine();
-                    System.out.print("Enter your city: ");
-                    String city = input.nextLine();
-                    System.out.print("Enter your password:");
-                    String password = input.nextLine();
-                    System.out.println("Enter your closest bank branch: ");
-                    String branch_name = input.nextLine();
-                    System.out.println("Enter your balance: ");
-                    String balance_str = input.nextLine();
-                    while(isDouble(balance_str)){
-                        System.out.println("Please provide a number");
-                        balance_str = input.nextLine();
-                    }
-                    Double balance = Double.parseDouble(balance_str);
-                    System.out.println("\nEnter a five word letter with a capital letter at the \nbeginning followed by " +
-                            "an underscore and a 3 digit number");
-                    String account_number2 = input.nextLine();
-                    while(checkAccountExist(account_number2)){
-                        System.out.println("Already exists");
-                        System.out.println("Enter a new five word letter:");
-                        account_number2 = input.nextLine();
-                    }
-                    if(account_number2.length() == 5){
-                        Map<String,String> insertArguments = new HashMap<>();
-                        insertArguments.put("account_number", "'"+account_number2+"'");
-                        insertArguments.put("branch_name", "'"+branch_name+"'");
-                        insertArguments.put("balance", String.valueOf(balance));
-                        dataBaseService.insert("account", insertArguments);
-                        Map<String, String> selectArguments = new HashMap<>();
-                        selectArguments.put("account_number", account_number2);
-                        ResultSet resultSet = dataBaseService.select("id","account",selectArguments);
-                        resultSet.next();
-                        int account_id = resultSet.getInt("id");
                         System.out.println("Your account_id will be " + account_id + "\nSave this number\n");
+
                         Map<String,String> insertArguments2 = new HashMap<>();
                         insertArguments2.put("customer_name", "'"+ name +"'");
                         insertArguments2.put("customer_street", "'" + street + "'");
@@ -156,7 +105,7 @@ public class AccountService {
         }
         return !resultado;
     }
-    private static boolean checkAccountExist(String account_number2) throws SQLException {
+    public boolean checkAccountExist(String account_number2) throws SQLException {
         Map<String,String> inputArguments = new HashMap<>();
         inputArguments.put("account_number", account_number2);
         ResultSet resultSet = dataBaseService.select("*", "account", inputArguments);
@@ -176,5 +125,26 @@ public class AccountService {
         System.out.println("Your balance is " + Engine.customer.getSelectedAccount().getBalance());
 
     }
+     public int getIdAccount(String account_number2) throws SQLException {
+         Map<String, String> selectArguments = new HashMap<>();
+         selectArguments.put("account_number", account_number2);
+         ResultSet resultSet = dataBaseService.select("id","account",selectArguments);
+         resultSet.next();
+         return resultSet.getInt("id");
+
+    }
+
+    public void createAccount(String account_number, String branch_name, double balance) {
+        Map<String, String> insertArguments = new HashMap<String, String>()
+        {
+            {
+                put("account_number", account_number );
+                put("branch_name", branch_name);
+                put("balance", String.valueOf(balance) );
+            }
+        };
+        dataBaseService.insert("account", insertArguments);
+    }
+
 
 }

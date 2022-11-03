@@ -65,6 +65,7 @@ public class dataBaseService {
         try{
             Connection connection = DriverManager.getConnection(this.url, this.username, this.password);
             Statement statement = connection.createStatement();
+            // Lo mismo que en los otros métodos
             if(updateArguments != null){
                 int i = -1;
                 for(Map.Entry<String, String> entry : updateArguments.entrySet()){

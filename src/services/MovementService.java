@@ -8,12 +8,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static services.UserService.input;
-import static services.UserService.dataBaseService;
+import static services.CustomerService.input;
+import static services.CustomerService.dataBaseService;
 //Por que input tengo que importarlo y Engine no?
 public class MovementService {
 
     public static void addMoney(){
+        // Alguna vez este if puede ser true?
         if(Engine.customer == null){
             System.out.println("First you need to login or create an account\nif don't have one");
             return;
@@ -23,14 +24,19 @@ public class MovementService {
         if(moneyToAdd < 0){
             System.out.println("Please provide a positive amount");
         }
+        //Si el la tabla principal que modiicas es Account porque estamos en Movement Service
         Engine.customer.getSelectedAccount().addMoney(moneyToAdd);
 
+        //La creación del hash map tiene que estar dentro del servicio
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Date date = new Date();
         LinkedHashMap<String, String> updateArguments = new LinkedHashMap<>();
         updateArguments.put("balance", String.valueOf(Engine.customer.getSelectedAccount().getBalance()));
         updateArguments.put("id", String.valueOf(Engine.customer.getSelectedAccount().getId()));
         dataBaseService.update("account", updateArguments);
+
+
+        //La creación del hash map tiene que estar dentro del servicio
         Map<String, String> insertArguments = new HashMap<>();
         insertArguments.put("time_and_date", "'"+formatter.format(date) + "'");
         insertArguments.put("from_account", String.valueOf(Engine.idIncome));
@@ -41,6 +47,7 @@ public class MovementService {
         System.out.println("Your current balance is " + Engine.customer.getSelectedAccount().getBalance());
     }
     public static void withDraw(){
+        //Lo mismo que en los if anteriores
         if(Engine.customer == null){
             System.out.println("First you need to create a profile or login");
         }
@@ -49,6 +56,7 @@ public class MovementService {
         if(moneyToWithdraw < 0){
             System.out.println("Please provide a positive amount");
         }
+        // Si la cosa gira entorno a cuentas porque estamos en MovementService
         Engine.customer.getSelectedAccount().withdraw(moneyToWithdraw);
         SimpleDateFormat formatter = new SimpleDateFormat("dd:MM:yyyy HH:mm:ss");
         Date date = new Date();
@@ -88,6 +96,7 @@ public class MovementService {
             LinkedHashMap<String, String> updateArguments = new LinkedHashMap<>();
             updateArguments.put("balance", String.valueOf(Engine.customer.getSelectedAccount().getBalance()));
             updateArguments.put("id", String.valueOf(Engine.customer.getSelectedAccount().getId()));
+            //Solo puedes llamar a dataBaseService update / insert / select con table=movement en este servicio
             dataBaseService.update("account", updateArguments);
             updateArguments.remove("balance");
             updateArguments.remove("id");
