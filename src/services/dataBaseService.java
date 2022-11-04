@@ -51,8 +51,7 @@ public class dataBaseService {
                     query += (entry.getKey())+ (" , ");
                     values += (entry.getValue()) + (", ");
                 }
-
-                query = (query + values).replaceAll(", $", ");") ;
+                query = (query.substring(0,query.length() -2) + values).replaceAll(", $", ");") ;
             }
             statement.executeUpdate(query.toString());
 

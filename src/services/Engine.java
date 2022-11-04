@@ -106,13 +106,17 @@ public class Engine {
                 "an underscore and a 3 digit number");
         String account_number = input.nextLine();
 
-
-        //EXpresiones regulares
+        while(account_number.length() != 5){
+            System.out.println("Enter a five_word letter");
+            account_number = input.nextLine();
+        }
+        /*EXpresiones regulares
         while(false){
             System.out.println("Already exists");
             System.out.println("Enter a new five word letter:");
             account_number = input.nextLine();
         }
+        */
 
         while(accountService.checkAccountExist(account_number)){
             System.out.println("Already exists");
@@ -121,7 +125,6 @@ public class Engine {
         }
 
         customerService.createCustomerAccount(name, street, city, password, branch_name, balance, account_number);
-
 
     }
 
@@ -158,9 +161,11 @@ public class Engine {
     }
 
     public void login() throws SQLException {
-        String personal_id = null;
-        String password1 = null;
-        Customer newCus = customerService.login( personal_id, password1);
+        System.out.println("Enter your Customer Id");
+        String personal_id = input.nextLine();
+        System.out.println("Enter your password");
+        String password = input.nextLine();
+        customer = customerService.login( personal_id, password);
     }
 
 

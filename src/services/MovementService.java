@@ -13,6 +13,8 @@ import static services.CustomerService.dataBaseService;
 //Por que input tengo que importarlo y Engine no?
 public class MovementService {
 
+    public static int idIncome = 18;
+    public static int idOutcome = 19;
     public static void addMoney(){
         // Alguna vez este if puede ser true?
         if(Engine.customer == null){
@@ -39,7 +41,7 @@ public class MovementService {
         //La creación del hash map tiene que estar dentro del servicio
         Map<String, String> insertArguments = new HashMap<>();
         insertArguments.put("time_and_date", "'"+formatter.format(date) + "'");
-        insertArguments.put("from_account", String.valueOf(Engine.idIncome));
+        insertArguments.put("from_account", String.valueOf(idIncome));
         insertArguments.put("to_account", String.valueOf(Engine.customer.getSelectedAccount().getId()));
         insertArguments.put("transaction", "'Adding'");
         insertArguments.put("customer_in_charge" ,String.valueOf(Engine.customer.getId()));
@@ -66,7 +68,7 @@ public class MovementService {
         dataBaseService.update("account", updateArguments);
         Map<String, String> insertArguments = new HashMap<>();
         insertArguments.put("time_and_date", "'"+formatter.format(date) + "'");
-        insertArguments.put("from_account", String.valueOf(Engine.idOutcome));
+        insertArguments.put("from_account", String.valueOf(idOutcome));
         insertArguments.put("to_account", String.valueOf(Engine.customer.getSelectedAccount().getId()));
         insertArguments.put("transaction", "'Withdraw'");
         insertArguments.put("customer_in_charge" ,String.valueOf(Engine.customer.getId()));
