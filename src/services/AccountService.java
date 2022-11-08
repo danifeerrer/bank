@@ -1,14 +1,12 @@
 package services;
 
 import objects.Account;
-
+import Engine.Engine;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static services.CustomerService.input;
-import static services.CustomerService.dataBaseService;
 public class AccountService {
 
     public static dataBaseService dataBaseService = new dataBaseService();
@@ -33,9 +31,10 @@ public class AccountService {
         SimpleDateFormat formatter = new SimpleDateFormat("dd:MM:yyyy HH:mm:ss");
         Date date = new Date();
         LinkedHashMap<String, String> updateArguments = new LinkedHashMap<>();
+        LinkedHashMap<String, String> whereArguments = new LinkedHashMap<>();
         updateArguments.put("balance", String.valueOf(Engine.customer.getSelectedAccount().getBalance()));
-        updateArguments.put("id", String.valueOf(Engine.customer.getSelectedAccount().getId()));
-        dataBaseService.update("account", updateArguments);
+        whereArguments.put("id", String.valueOf(Engine.customer.getSelectedAccount().getId()));
+        dataBaseService.update("account", updateArguments, whereArguments);
         movementService.withDrawMovement();
     }
     public boolean checkAccountExist(String account_number2) throws SQLException {
@@ -60,19 +59,20 @@ public class AccountService {
             resultSet.next();
             Double balanceOtherAccount = resultSet.getDouble("balance") + moneyToSend;
             LinkedHashMap<String, String> updateArguments = new LinkedHashMap<>();
+            LinkedHashMap<String, String> whereArguments = new LinkedHashMap<>();
             updateArguments.put("balance", String.valueOf(Engine.customer.getSelectedAccount().getBalance()));
-            updateArguments.put("id", String.valueOf(Engine.customer.getSelectedAccount().getId()));
+            whereArguments.put("id", String.valueOf(Engine.customer.getSelectedAccount().getId()));
             //Solo puedes llamar a dataBaseService update / insert / select con table=movement en este servicio
-            dataBaseService.update("account", updateArguments);
+            dataBaseService.update("account", updateArguments, whereArguments);
             updateArguments.remove("balance");
             updateArguments.remove("id");
             updateArguments.put("balance", String.valueOf(balanceOtherAccount));
-            updateArguments.put("id", String.valueOf(idOtherAccount));
-            dataBaseService.update("account", updateArguments);
+            whereArguments.put("id", String.valueOf(idOtherAccount));
+            dataBaseService.update("account", updateArguments,whereArguments);
             movementService.transactionMovement(idOtherAccount);
             System.out.println("Your current balance is " + Engine.customer.getSelectedAccount().getBalance());
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
     public static void addMoney(Double amount){
@@ -82,12 +82,11 @@ public class AccountService {
         Engine.customer.getSelectedAccount().addMoney(amount);
 
         //La creación del hash map tiene que estar dentro del servicio
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        Date date = new Date();
         LinkedHashMap<String, String> updateArguments = new LinkedHashMap<>();
+        LinkedHashMap<String, String> whereArguments = new LinkedHashMap<>();
         updateArguments.put("balance", String.valueOf(Engine.customer.getSelectedAccount().getBalance()));
-        updateArguments.put("id", String.valueOf(Engine.customer.getSelectedAccount().getId()));
-        dataBaseService.update("account", updateArguments);
+        whereArguments.put("id", String.valueOf(Engine.customer.getSelectedAccount().getId()));
+        dataBaseService.update("account", updateArguments, whereArguments);
         movementService.addMovement();
 
         //La creación del hash map tiene que estar dentro del servicio

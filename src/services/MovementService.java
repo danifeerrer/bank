@@ -1,13 +1,14 @@
 package services;
-
+import Engine.Engine;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.text.SimpleDateFormat;
 
-//Por que input tengo que importarlo y Engine no?
+
+//Por que input tengo que importarlo y Engine.Engine no?
 public class MovementService {
     public static dataBaseService dataBaseService = new dataBaseService();
     public static int idIncome = 18;
@@ -38,7 +39,7 @@ public class MovementService {
         System.out.println("Your current balance is " + Engine.customer.getSelectedAccount().getBalance());
     }
     public static void transactionMovement(int idOtherAccount){
-        SimpleDateFormat formatter = new SimpleDateFormat("dd:MM:yyyy HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Date date = new Date();
         Map<String, String> insertArguments = new HashMap<>();
         insertArguments.put("time_and_date", "'" + formatter.format(date)+ "'");
@@ -58,7 +59,6 @@ public class MovementService {
                 System.out.println(resultSet.getString("transaction") + " was made the "
                         + resultSet.getString("time_and_date") );
             }
-            System.out.println("\n");
 
         }catch(Exception e){
             e.printStackTrace();

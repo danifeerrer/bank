@@ -1,7 +1,7 @@
-package services;
-// ¿Por qué engine me lo has metido en el páquete service?
+package Engine;// ¿Por qué engine me lo has metido en el páquete service?
 
 import objects.Customer;
+import services.*;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -23,11 +23,11 @@ public class Engine {
     public void work() throws SQLException {
         while(true){
             while(customer == null){
-                // ¿Por qué menu es user service? Sería mejor que fuera un método que pertezca a Engine
+                // ¿Por qué menu es user service? Sería mejor que fuera un método que pertezca a Engine.Engine
                 menu1();
                 String numero = input.nextLine();
                 while(isNumeric(numero)){
-                    System.out.println("Write a name between 1 and 3: ");
+                    System.out.println("Write a number between 1 and 3: ");
                     numero = input.nextLine();
                 }
                 int number = Integer.parseInt(numero);
@@ -48,7 +48,7 @@ public class Engine {
                 menu2();
                 String numero = input.nextLine();
                 while(isNumeric(numero)){
-                    System.out.println("Write a name between 1 and 7: ");
+                    System.out.println("Write a number between 1 and 7: ");
                     numero = input.nextLine();
                 }
                 int number = Integer.parseInt(numero);
@@ -66,7 +66,8 @@ public class Engine {
                         transaction();
                         break;
                     case 5:
-                        movementService.movements();
+                        movementService.movementsTransactionAndWithdraw();
+                        movementService.movementsAdd();
                         break;
                     case 6:
                         customer = null;

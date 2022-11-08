@@ -59,7 +59,7 @@ public class dataBaseService {
             e.printStackTrace();
         }
     }
-    public void update(String table, LinkedHashMap<String, String> updateArguments){
+    public void update(String table, LinkedHashMap<String, String> updateArguments, LinkedHashMap<String, String> whereArguments){
         //String query = new StringBuilder("update " + table + " set ";
         String query = "update " + table + " set ";
         try{
@@ -67,20 +67,22 @@ public class dataBaseService {
             Statement statement = connection.createStatement();
             // Lo mismo que en los otros métodos
             if(updateArguments != null){
-
-                int i = 0;
                 for(Map.Entry<String, String> entry : updateArguments.entrySet()){
+                    /*
                     if(i == updateArguments.entrySet().size() -1){
                         query += "where " + entry.getKey() + "= " + "'"+entry.getValue()+"'";
                         query = query.replace(", where", " where");
                         break;
                     }
+                    */
                     query += entry.getKey() + "='" + entry.getValue() + "', ";
-
-                    i++;
                 }
+                query = query.substring(0, query.length() - 2) + " where ";
+                for(Map.Entry<String,String> entry : whereArguments.entrySet()){
+                    query += entry.getKey() + "='" + entry.getValue() + "', ";
+                }
+                query = query.substring(0, query.length() - 2);
             }
-
             statement.executeUpdate(query + ";");
 
         }catch(Exception e){
