@@ -4,15 +4,19 @@ import objects.Account;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static services.CustomerService.input;
 import static services.CustomerService.dataBaseService;
 public class AccountService {
 
-    public dataBaseService dataBaseService = new dataBaseService();
+    public static dataBaseService dataBaseService = new dataBaseService();
+    public static int idIncome = 18;
+    public static MovementService movementService = new MovementService();
+
+    public static int idOutcome = 19;
+
     private static boolean isDouble(String parametro){
         boolean resultado;
         try {
@@ -23,6 +27,16 @@ public class AccountService {
             resultado = false;
         }
         return !resultado;
+    }
+    public static void withDraw(Double amount){
+        Engine.customer.getSelectedAccount().withdraw(amount);
+        SimpleDateFormat formatter = new SimpleDateFormat("dd:MM:yyyy HH:mm:ss");
+        Date date = new Date();
+        LinkedHashMap<String, String> updateArguments = new LinkedHashMap<>();
+        updateArguments.put("balance", String.valueOf(Engine.customer.getSelectedAccount().getBalance()));
+        updateArguments.put("id", String.valueOf(Engine.customer.getSelectedAccount().getId()));
+        dataBaseService.update("account", updateArguments);
+        movementService.withDrawMovement();
     }
     public boolean checkAccountExist(String account_number2) throws SQLException {
         Map<String,String> inputArguments = new HashMap<>();
@@ -35,6 +49,49 @@ public class AccountService {
             }
         }
         return false;
+    }
+    public static void transaction(Double moneyToSend, int idOtherAccount){
+
+        Engine.customer.getSelectedAccount().withdraw(moneyToSend);
+        Map<String,String> selectArguments = new HashMap<>();
+        selectArguments.put("id", String.valueOf(idOtherAccount));
+        try {
+            ResultSet resultSet = dataBaseService.select("balance","account", selectArguments);
+            resultSet.next();
+            Double balanceOtherAccount = resultSet.getDouble("balance") + moneyToSend;
+            LinkedHashMap<String, String> updateArguments = new LinkedHashMap<>();
+            updateArguments.put("balance", String.valueOf(Engine.customer.getSelectedAccount().getBalance()));
+            updateArguments.put("id", String.valueOf(Engine.customer.getSelectedAccount().getId()));
+            //Solo puedes llamar a dataBaseService update / insert / select con table=movement en este servicio
+            dataBaseService.update("account", updateArguments);
+            updateArguments.remove("balance");
+            updateArguments.remove("id");
+            updateArguments.put("balance", String.valueOf(balanceOtherAccount));
+            updateArguments.put("id", String.valueOf(idOtherAccount));
+            dataBaseService.update("account", updateArguments);
+            movementService.transactionMovement(idOtherAccount);
+            System.out.println("Your current balance is " + Engine.customer.getSelectedAccount().getBalance());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void addMoney(Double amount){
+        // Alguna vez este if puede ser true?
+
+        //Si el la tabla principal que modiicas es Account porque estamos en Movement Service
+        Engine.customer.getSelectedAccount().addMoney(amount);
+
+        //La creación del hash map tiene que estar dentro del servicio
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = new Date();
+        LinkedHashMap<String, String> updateArguments = new LinkedHashMap<>();
+        updateArguments.put("balance", String.valueOf(Engine.customer.getSelectedAccount().getBalance()));
+        updateArguments.put("id", String.valueOf(Engine.customer.getSelectedAccount().getId()));
+        dataBaseService.update("account", updateArguments);
+        movementService.addMovement();
+
+        //La creación del hash map tiene que estar dentro del servicio
+
     }
     public static void info(){
 
@@ -80,5 +137,8 @@ public class AccountService {
                     resultSet.getDouble("balance"));
         }
         return account;
+    }
+    public static boolean checkAccountNumber(String account_number){
+        return account_number.matches("^[A-Z]{1}[-][0-9]{3}");
     }
 }

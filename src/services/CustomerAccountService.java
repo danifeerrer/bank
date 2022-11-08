@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CustomerAccountService {
-    public dataBaseService dataBaseService = new dataBaseService();
+
+    public static dataBaseService dataBaseService = new dataBaseService();
     public void createCustomerAccount(int customer_id, int account_id){
         Map<String, String> insertArguments = new HashMap<>()
         {
@@ -31,5 +32,15 @@ public class CustomerAccountService {
             ids.add(resultSet.getInt("account_id"));
         }
         return ids;
+    }
+    public static void addAccountoCostumer(int account_id){
+        Map<String, String> insertArguments = new HashMap<>()
+        {
+            {
+                put("customer_id", String.valueOf(Engine.customer.getId()));
+                put("account_id", String.valueOf(account_id));
+            }
+        };
+        dataBaseService.insert("customer_account", insertArguments);
     }
 }

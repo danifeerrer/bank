@@ -13,10 +13,12 @@ public class Engine {
 
     Scanner input = new Scanner(System.in);
     public static Customer customer;
-
+    public MovementService movementService = new MovementService();
     public CustomerService customerService = new CustomerService();
 
     public AccountService accountService = new AccountService();
+
+    public CustomerAccountService customerAccount = new CustomerAccountService();
 
     public void work() throws SQLException {
         while(true){
@@ -52,19 +54,19 @@ public class Engine {
                 int number = Integer.parseInt(numero);
                 switch(number){
                     case 1:
-                        MovementService.addMoney();
+                        addFunction();
                         break;
                     case 2:
-                        MovementService.withDraw();
+                        withDrawFunction();
                         break;
                     case 3:
                         AccountService.info();
                         break;
                     case 4:
-                        MovementService.transaction();
+                        transaction();
                         break;
                     case 5:
-                        CustomerService.movements();
+                        movementService.movements();
                         break;
                     case 6:
                         customer = null;
@@ -79,7 +81,35 @@ public class Engine {
             }
         }
     }
-
+    private void transaction(){
+        System.out.print("Enter the amount you'd like to send: ");
+        double moneyToSend = Double.parseDouble(input.nextLine());
+        System.out.print("Enter the id of the account you'd like to send money to: ");
+        int idOtherAccount = Integer.parseInt(input.nextLine());
+        while(moneyToSend < 0){
+            System.out.println("Please provide a positive amount");
+            moneyToSend = Double.parseDouble(input.nextLine());
+        }
+        accountService.transaction(moneyToSend, idOtherAccount);
+    }
+    private void addFunction(){
+        System.out.println("Enter the amount you'd like to add: ");
+        double amount = Double.parseDouble(input.nextLine());
+        while(amount < 0){
+            System.out.println("Please provide a positive amount");
+            amount = Double.parseDouble(input.nextLine());
+        }
+        accountService.addMoney(amount);
+    }
+    private void withDrawFunction(){
+        System.out.print("Enter the amount you'd like to withdraw: ");
+        double amount = Double.parseDouble(input.nextLine());
+        while(amount < 0){
+            System.out.println("Please provide a positive amount");
+            amount = Double.parseDouble(input.nextLine());
+        }
+        accountService.withDraw(amount);
+    }
     private void createCustomerAccount() throws SQLException {
         System.out.print("Enter your name: ");
         String name = (input.nextLine());
@@ -110,13 +140,13 @@ public class Engine {
             System.out.println("Enter a five_word letter");
             account_number = input.nextLine();
         }
-        /*EXpresiones regulares
-        while(false){
-            System.out.println("Already exists");
+
+        while(!accountService.checkAccountNumber(account_number)){
+            System.out.println("Not valid sintax");
             System.out.println("Enter a new five word letter:");
             account_number = input.nextLine();
         }
-        */
+
 
         while(accountService.checkAccountExist(account_number)){
             System.out.println("Already exists");
@@ -125,11 +155,39 @@ public class Engine {
         }
 
         customerService.createCustomerAccount(name, street, city, password, branch_name, balance, account_number);
-
+        int idAccount = accountService.getIdAccount(account_number);
+        CustomerAccountService.addAccountoCostumer(idAccount);
     }
 
-    private void createAccount() {
 
+
+    private void createAccount() throws SQLException {
+        System.out.print("Enter a new account number: ");
+        String account_number = input.nextLine();
+        while(account_number.length() != 5){
+            System.out.println("It must be a five word letter");
+            account_number = input.nextLine();
+        }
+        while(!accountService.checkAccountNumber(account_number)){
+            System.out.println("Enter a new five word letter, wrong syntax: ");
+            account_number = input.nextLine();
+        }
+        while(accountService.checkAccountExist(account_number)){
+            System.out.print("Already exists, enter a new one:");
+            account_number = input.nextLine();
+        }
+        System.out.print("Enter your closest branch: ");
+        String branch_name = input.nextLine();
+
+        System.out.print("Enter your balance: ");
+        double balance = Double.parseDouble(input.nextLine());
+
+        accountService.createAccount(account_number, branch_name, balance);
+        int idAccount = accountService.getIdAccount(account_number);
+
+        System.out.println("Your new account id will be " + idAccount);
+
+        customerAccount.addAccountoCostumer(idAccount);
     }
 
     private static boolean isNumeric(String parametro){

@@ -57,25 +57,6 @@ public class CustomerService {
         return customer;
 
     }
-    public static void movements(){
-        // El movimiento lo registra el sistema, ¿Alguna vez este if es true?
-        if(Engine.customer == null){
-            System.out.println("First you need to create a profile");
-        }
-        try{
-            Map<String,String> movementArguments = new HashMap<>();
-            movementArguments.put("from_account", String.valueOf(Engine.customer.getSelectedAccount().getId()));
-            ResultSet resultSet = dataBaseService.select("time_and_date, transaction", "movements",movementArguments);
-            while(resultSet.next()){
-                System.out.println(resultSet.getString("transaction") + " was made the "
-                        + resultSet.getString("time_and_date") );
-            }
-            System.out.println("\n");
-
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
 
     public void createCustomerAccount(String name, String street, String city, String password, String branch_name, double balance, String account_number) throws SQLException {
 

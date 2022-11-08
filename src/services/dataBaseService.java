@@ -67,28 +67,20 @@ public class dataBaseService {
             Statement statement = connection.createStatement();
             // Lo mismo que en los otros métodos
             if(updateArguments != null){
-                //int i = -1;
+
                 int i = 0;
                 for(Map.Entry<String, String> entry : updateArguments.entrySet()){
-                    //i++;
-                    //if(i == 0){
-                    //    query.append(entry.getKey()).append(" = ").append(entry.getValue());
-                    //}
-                    if(i == updateArguments.size() - 1){
+                    if(i == updateArguments.entrySet().size() -1){
                         query += "where " + entry.getKey() + "= " + "'"+entry.getValue()+"'";
                         query = query.replace(", where", " where");
                         break;
                     }
                     query += entry.getKey() + "='" + entry.getValue() + "', ";
-                    System.out.println(query);
-                    i++;
 
-                    //if(i==1){
-                    //    query.append(" where ").append(entry.getKey()).append(" ='").append(entry.getValue()).append("' ;");
-                    //}
+                    i++;
                 }
             }
-            System.out.println(query + ";");
+
             statement.executeUpdate(query + ";");
 
         }catch(Exception e){
